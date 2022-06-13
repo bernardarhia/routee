@@ -10,5 +10,6 @@
     "author":{
         "name":"Bernard Arhia",
         "email":"bernardarhia@gmail.com"
-    }
+    },
+    "lincense":"MIT"
 }
