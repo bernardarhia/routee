@@ -2,11 +2,10 @@
 
 namespace Http;
 
-use Helpers\Helpers;
-use Http\Request as HttpRequest;
-use Http\Response as HttpResponse;
-
+use Http\Request;
+use Http\Response;
 use View\View;
+use Helpers\Helpers;
 
 class Router
 {
@@ -14,6 +13,9 @@ class Router
     private $notFoundHandler;
     private const METHOD_POST = "POST";
     private const METHOD_GET = "GET";
+    private const METHOD_PATCH = "PATCH";
+    private const METHOD_PUT = "PUT";
+    private const METHOD_DELETE = "DELETE";
     private $routePath;
 
     private $setPath = null;
@@ -37,6 +39,24 @@ class Router
         $this->addHandlers(self::METHOD_POST, $this->routePath ? $this->routePath . $path : $path, $handler);
         return $this;
     }
+    public function put(string $path, $handler)
+    {
+        $this->addHandlers(self::METHOD_PUT, $this->routePath ? $this->routePath . $path : $path, $handler);
+
+        return $this;
+    }
+    public function patch(string $path, $handler)
+    {
+        $this->addHandlers(self::METHOD_PATCH, $this->routePath ? $this->routePath . $path : $path, $handler);
+
+        return $this;
+    }
+    public function delete(string $path, $handler)
+    {
+        $this->addHandlers(self::METHOD_DELETE, $this->routePath ? $this->routePath . $path : $path, $handler);
+
+        return $this;
+    }
 
     public function addNotFoundHandler($handler): void
     {
@@ -53,8 +73,8 @@ class Router
 
     public function run()
     {
-        $request = new HttpRequest();
-        $response = new HttpResponse();
+        $request = new Request();
+        $response = new Response();
         $requestUri = parse_url($_SERVER['REQUEST_URI']);
         $requestPath = $requestUri['path'];
         $callback = null;

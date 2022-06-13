@@ -28,8 +28,8 @@ print_r($data->session);
         }
 
         try {
-            const response = await fetch("/student/create", {
-                method: "POST",
+            const response = await fetch("/student/delete", {
+                method: "DELETE",
                 body: JSON.stringify(data),
             })
             const result = await response.json()
