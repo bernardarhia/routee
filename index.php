@@ -1,11 +1,14 @@
 <?php
 // enable all php error
+
+use Http\Router;
+
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once __DIR__ . "/vendor/autoload.php";
 
-use Routee\Router;
 
 $router = new Router;
 // ROUTES

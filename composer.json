@@ -3,8 +3,7 @@
     "description": "A very simple and lightweight routing library for PHP.",
     "autoload": {
         "psr-4": {
-            "Routee\\": "src/",
-            "Controller\\":"/"
+            "":"src/"
         }
     },
     "author":{
