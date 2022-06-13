@@ -1,5 +1,5 @@
 {
-    "name":"Bernard-Arhia/Routee",
+    "name":"bernard-arhia/routee",
     "description": "A very simple and lightweight routing library for PHP.",
     "autoload": {
         "psr-4": {
