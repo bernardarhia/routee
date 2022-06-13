@@ -9,7 +9,7 @@ use Routee\Router;
 
 $router = new Router;
 // ROUTES
-include_once __DIR__ . "/routes/student.php";
+include_once __DIR__ . "/test/student.php";
 
 $session_data = [
     "lifetime" => 3600,

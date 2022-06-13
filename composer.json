@@ -1,7 +1,14 @@
 {
+    "name":"Routee",
+    "description": "A very simple and lightweight routing library for PHP.",
     "autoload": {
         "psr-4": {
-            "Routee\\": "src/"
+            "Routee\\": "src/",
+            "Controller":"/"
         }
+    },
+    "author":{
+        "name":"Bernard Arhia",
+        "email":"bernardarhia@gmail.com"
     }
 }
