@@ -87,9 +87,11 @@ class Request
     {
         $cookies = [];
 
+        if (isset($_COOKIE['PHPSESSID']) && count($_COOKIE) < 2) return $cookies;
         $key  = '';
         foreach ($_COOKIE as $key => $value) {
 
+            if ($key == "PHPSESSID") continue;
             // convert data to json object if the data is an array or object
             if (is_object(json_decode($value)) || is_array(json_decode($value))) {
                 $cookies[$key] = json_decode($value);

@@ -86,9 +86,6 @@ class Router
 
             if (count($path) !== count($cutUrls)) continue;
             if (preg_match_all("/:\w+/i", $handler['path'], $matches)) {
-
-                print_r($matches);
-                return;
                 //    find and replace all :param with the value from the
                 $request->params = [];
                 for ($i = 0; $i < count($cutUrls); $i++) {

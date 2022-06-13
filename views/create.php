@@ -19,27 +19,27 @@ print_r($data->session);
     <input type="text">
     <button>submit</button>
     <script>
-    const input = document.querySelector("input")
-    const button = document.querySelector("button")
+        const input = document.querySelector("input")
+        const button = document.querySelector("button")
 
-    async function sendRequest() {
-        const data = {
-            name: input.value
+        async function sendRequest() {
+            const data = {
+                name: input.value
+            }
+
+            try {
+                const response = await fetch("/student/update", {
+                    method: "PATCH",
+                    body: JSON.stringify(data),
+                })
+                const result = await response.json()
+                console.log(result)
+            } catch (e) {
+                console.log(e);
+            }
+
         }
-
-        try {
-            const response = await fetch("/student/delete", {
-                method: "DELETE",
-                body: JSON.stringify(data),
-            })
-            const result = await response.json()
-            console.log(result)
-        } catch (e) {
-            console.log(e);
-        }
-
-    }
-    button.addEventListener("click", sendRequest)
+        button.addEventListener("click", sendRequest)
     </script>
 </body>
 

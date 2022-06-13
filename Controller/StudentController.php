@@ -21,6 +21,7 @@ class StudentController
     }
     public function update(HttpRequest $request, HttpResponse $response)
     {
-        return $response->session(['id' => 1, "name" => "ben"])->send($request->session->name);
+        $response->cookie("data", 5, time() + 60 * 60 * 24 * 30, "/", "localhost", false, true);
+        return $response->session(['id' => 1, "name" => "ben"])->send($request->cookies);
     }
 }
