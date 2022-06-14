@@ -1,25 +1,25 @@
 <?php
 
-use Http\Request as HttpRequest;
-use Http\Response as HttpResponse;
-use View\View;
+use Routee\Http\Request;
+use Routee\Http\Response;
+use Routee\View\View;
 
 class StudentController
 {
-    public function index(HttpRequest $request, HttpResponse $response)
+    public function index(Request $request, Response $response)
     {
         $request->regenerate_session_id(true);
         View::render("create", ["session" => $request->session, "data" => "A very nice data"]);
     }
-    public function create(HttpRequest $request, HttpResponse $response)
+    public function create(Request $request, Response $response)
     {
         return $response->session(['id' => 1, "name" => "ben"])->send($request->session->name);
     }
-    public function delete(HttpRequest $request, HttpResponse $response)
+    public function delete(Request $request, Response $response)
     {
         return $response->session(['id' => 1, "name" => "ben"])->send($request->session->name);
     }
-    public function update(HttpRequest $request, HttpResponse $response)
+    public function update(Request $request, Response $response)
     {
         $response->cookie("data", 5, time() + 60 * 60 * 24 * 30, "/", "localhost", false, true);
         return $response->session(['id' => 1, "name" => "ben"])->send($request->cookies);

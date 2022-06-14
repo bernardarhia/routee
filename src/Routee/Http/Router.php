@@ -1,11 +1,11 @@
 <?php
 
-namespace Http;
+namespace Routee\Http;
 
-use Http\Request;
-use Http\Response;
-use View\View;
-use Helpers\Helpers;
+use Routee\Http\Response;
+use Routee\View\View;
+use Routee\Helpers\Helpers;
+use Routee\Http\Request;
 
 class Router
 {
@@ -123,13 +123,15 @@ class Router
     {
         $this->setPath = $path;
         $extracted = explode("/", $this->setPath);
-        $newPath = __DIR__ . "/../../{$extracted[count($extracted) - 1]}";
-        if (file_exists($newPath)) View::getPath($newPath);
+        $newPath = $_SERVER['DOCUMENT_ROOT'] . "/{$extracted[count($extracted) - 1]}";
+        if (file_exists($newPath)) {
+            View::getPath($newPath);
+        }
     }
     private function setPath()
     {
-        if (!file_exists(__DIR__ . "/../../views")) mkdir(__DIR__ . "/../../views");
-        $this->setPath = __DIR__ . "/../../views";
+        if (!file_exists($_SERVER['DOCUMENT_ROOT'] . "/views")) mkdir($_SERVER['DOCUMENT_ROOT'] . "/views");
+        $this->setPath = $_SERVER['DOCUMENT_ROOT'] . "/views";
     }
 
     /**

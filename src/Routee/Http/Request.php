@@ -1,8 +1,8 @@
 <?php
 
-namespace Http;
+namespace Routee\Http;
 
-use Helpers\Helpers;
+use Routee\Helpers\Helpers;
 
 class Request
 {

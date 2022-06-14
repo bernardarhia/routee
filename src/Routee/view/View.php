@@ -1,6 +1,6 @@
 <?php
 
-namespace View;
+namespace Routee\View;
 
 class View
 {

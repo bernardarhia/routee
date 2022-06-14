@@ -9,9 +9,7 @@
 </head>
 
 <pre>
-<?php
-print_r($data->session);
-?>
+
 </pre>
 <br />
 
@@ -19,27 +17,27 @@ print_r($data->session);
     <input type="text">
     <button>submit</button>
     <script>
-        const input = document.querySelector("input")
-        const button = document.querySelector("button")
+    const input = document.querySelector("input")
+    const button = document.querySelector("button")
 
-        async function sendRequest() {
-            const data = {
-                name: input.value
-            }
-
-            try {
-                const response = await fetch("/student/update", {
-                    method: "PATCH",
-                    body: JSON.stringify(data),
-                })
-                const result = await response.json()
-                console.log(result)
-            } catch (e) {
-                console.log(e);
-            }
-
+    async function sendRequest() {
+        const data = {
+            name: input.value
         }
-        button.addEventListener("click", sendRequest)
+
+        try {
+            const response = await fetch("/session", {
+                method: "POST",
+                body: JSON.stringify(data),
+            })
+            const result = await response.json()
+            console.log(result)
+        } catch (e) {
+            console.log(e);
+        }
+
+    }
+    button.addEventListener("click", sendRequest)
     </script>
 </body>
 

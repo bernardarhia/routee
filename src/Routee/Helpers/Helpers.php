@@ -1,6 +1,6 @@
 <?php
 
-namespace Helpers;
+namespace Routee\Helpers;
 
 trait Helpers
 {

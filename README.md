@@ -1,7 +1,7 @@
 
 # Routee
 
-A lightweight php routing service that works a litle like express js
+A lightweight php routing service for writing fullstack applications in PHP. 
 
 # Notice
 
@@ -46,9 +46,12 @@ The Route accepts the following http request methods
 <!-- * HEAD
 * OPTIONS -->
 
-The router accepts basically two parameters
-* **$path**: the path of the route
-* **$callback**: the callback function to be executed when the route is matched (You can also pass in a class method)
+The router accepts basically the following parameters
+* ***(string)*** **$path**: the path of the route
+* ***(string|string[])*** **$middleware**: the middleware to be applied to the route
+* ***(method)*** **$callback**: the callback function to be executed when the route is matched (You can also pass in a class method)
 
-However, the router also accepts a third param, which is an array of middleware functions.
-The $callback function will be executed after the middleware functions and it does accept the params **(Request, Response)**
+The middleware accepts the following parameters
+- $request - contains data for the incoming request
+- $response - contains data for the outgoing response
+- $next - the next middleware to be executed

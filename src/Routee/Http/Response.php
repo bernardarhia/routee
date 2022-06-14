@@ -1,6 +1,6 @@
 <?php
 
-namespace Http;
+namespace Routee\Http;
 
 class Response
 {
