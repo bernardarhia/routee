@@ -10,9 +10,13 @@ require_once __DIR__ . "/vendor/autoload.php";
 
 $router = new Router;
 
-$router->get("/", function () {
-    View::render("create");
-});
+$router->get(
+    "/",
+    function () {
+        View::render("create");
+    },
+    ['auth', 'isAdmin']
+);
 $router->post("/session", function ($request, $response) {
     $response->session(['isLogged' => true, 'isAdmin' => 'admin'])->send("session set");
 });
