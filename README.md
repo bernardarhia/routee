@@ -5,7 +5,7 @@ A lightweight php routing service for writing fullstack applications in PHP.
 
 # Notice
 
-Make sure you are using php version >= 5.4
+Make sure you are using php version >= 8.0.1
 
 # Installation
 
