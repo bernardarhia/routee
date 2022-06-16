@@ -7,11 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
-
-<pre>
-
-</pre>
-<br />
+<h1>You are not authenticated</h1>
 
 <body>
     <input type="text">
@@ -26,7 +22,7 @@
         }
 
         try {
-            const response = await fetch("/session", {
+            const response = await fetch("/student/create", {
                 method: "POST",
                 body: JSON.stringify(data),
             })

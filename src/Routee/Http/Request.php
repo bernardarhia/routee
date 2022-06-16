@@ -186,4 +186,9 @@ class Request
         if (!isset($_SESSION)) return null;
         return Helpers::turnToJSON($_SESSION);
     }
+    public function redirect($path = null)
+    {
+        header("Location: " . $path);
+        die;
+    }
 }

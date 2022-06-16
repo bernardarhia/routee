@@ -7,6 +7,7 @@ use Routee\View\View;
 use Routee\Helpers\Helpers;
 use Routee\Http\Request;
 use Routee\Http\MiddlewareStack;
+use stdClass;
 
 class Router
 {
@@ -29,31 +30,31 @@ class Router
         }
         $this->setViewPath($this->setPath);
     }
-    public function get(string $path, $handler, $middleware)
+    public function get(string $path, $handler, $middleware = [])
     {
         $this->addHandlers(self::METHOD_GET, $this->routePath ? $this->routePath . $path : $path, $handler, $middleware);
 
         return $this;
     }
 
-    public function post(string $path, $handler)
+    public function post(string $path, $handler, $middleware = [])
     {
         $this->addHandlers(self::METHOD_POST, $this->routePath ? $this->routePath . $path : $path, $handler);
         return $this;
     }
-    public function put(string $path, $handler)
+    public function put(string $path, $handler, $middleware = [])
     {
         $this->addHandlers(self::METHOD_PUT, $this->routePath ? $this->routePath . $path : $path, $handler);
 
         return $this;
     }
-    public function patch(string $path, $handler)
+    public function patch(string $path, $handler, $middleware = [])
     {
         $this->addHandlers(self::METHOD_PATCH, $this->routePath ? $this->routePath . $path : $path, $handler);
 
         return $this;
     }
-    public function delete(string $path, $handler)
+    public function delete(string $path, $handler, $middleware = [])
     {
         $this->addHandlers(self::METHOD_DELETE, $this->routePath ? $this->routePath . $path : $path, $handler);
 
@@ -64,7 +65,7 @@ class Router
     {
         $this->notFoundHandler = $handler;
     }
-    private function addHandlers(string $method, string $path, $handler, $middleware = null): void
+    private function addHandlers(string $method, string $path, $handler, $middleware = []): void
     {
         $this->handlers[$method . $path] = [
             'path' => $path,
@@ -172,6 +173,13 @@ class Router
             }
             if ($handler['path'] === $requestPath && $handler['method'] === $method) {
                 $callback = $handler['handler'];
+            }
+
+            if (count($handler['middleware']) > 0 && array_values($handler['middleware']) !== $handler['middleware']) {
+                foreach ($handler['middleware'] as $middleware_key => $middleware_value) {
+                    $middleware = new $middleware_key();
+                    $middleware->$middleware_value($request, $response);
+                }
             }
         }
 
