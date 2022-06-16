@@ -39,24 +39,24 @@ class Router
 
     public function post(string $path, $handler, $middleware = [])
     {
-        $this->addHandlers(self::METHOD_POST, $this->routePath ? $this->routePath . $path : $path, $handler);
+        $this->addHandlers(self::METHOD_POST, $this->routePath ? $this->routePath . $path : $path, $handler, $middleware);
         return $this;
     }
     public function put(string $path, $handler, $middleware = [])
     {
-        $this->addHandlers(self::METHOD_PUT, $this->routePath ? $this->routePath . $path : $path, $handler);
+        $this->addHandlers(self::METHOD_PUT, $this->routePath ? $this->routePath . $path : $path, $handler, $middleware);
 
         return $this;
     }
     public function patch(string $path, $handler, $middleware = [])
     {
-        $this->addHandlers(self::METHOD_PATCH, $this->routePath ? $this->routePath . $path : $path, $handler);
+        $this->addHandlers(self::METHOD_PATCH, $this->routePath ? $this->routePath . $path : $path, $handler, $middleware);
 
         return $this;
     }
     public function delete(string $path, $handler, $middleware = [])
     {
-        $this->addHandlers(self::METHOD_DELETE, $this->routePath ? $this->routePath . $path : $path, $handler);
+        $this->addHandlers(self::METHOD_DELETE, $this->routePath ? $this->routePath . $path : $path, $handler, $middleware);
 
         return $this;
     }
@@ -175,11 +175,14 @@ class Router
                 $callback = $handler['handler'];
             }
 
+            // Run middleware if any is in the route params
+            $catch = false;
             if (count($handler['middleware']) > 0 && array_values($handler['middleware']) !== $handler['middleware']) {
                 foreach ($handler['middleware'] as $middleware_key => $middleware_value) {
                     $middleware = new $middleware_key();
-                    $middleware->$middleware_value($request, $response);
+                    $catch = $middleware->$middleware_value($request, $response);
                 }
+                if ($catch) die;
             }
         }
 

@@ -16,7 +16,7 @@ $router->session_start(
         "path" => "/",
         "domain" => "localhost",
         "secure" => false,
-        "httpOnly" => false
+        "httpOnly" => true
     ]
 );
 include_once __DIR__ . "/routes/student.php";

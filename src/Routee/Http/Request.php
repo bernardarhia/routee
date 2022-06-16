@@ -43,9 +43,6 @@ class Request
         } catch (\Throwable $e) {
             echo ($e->getMessage()) . " ";
         }
-
-        // session_regenerate_id();
-        // $this->resetCookie();
     }
 
     /**
@@ -181,11 +178,13 @@ class Request
     {
         session_regenerate_id($bool);
     }
-    public function session()
+
+    public function session(): object|null
     {
         if (!isset($_SESSION)) return null;
-        return Helpers::turnToJSON($_SESSION);
+        return Helpers::turnToJSON($_SESSION) ?? null;
     }
+
     public function redirect($path = null)
     {
         header("Location: " . $path);

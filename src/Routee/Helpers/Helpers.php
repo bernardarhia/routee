@@ -2,6 +2,8 @@
 
 namespace Routee\Helpers;
 
+use stdClass;
+
 trait Helpers
 {
     /**
@@ -9,10 +11,11 @@ trait Helpers
      * 
      * turnToJSON is a method that turns an array into a json object
      * 
-     * @return object
+     * @return object|null
      */
-    static function turnToJSON(array $array = [])
+    static function turnToJSON(array $array = []): object|null
     {
+        if (count($array) < 1) return null;
         return json_decode(json_encode($array)) ?? null;
     }
     /**
