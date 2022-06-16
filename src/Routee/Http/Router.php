@@ -6,8 +6,6 @@ use Routee\Http\Response;
 use Routee\View\View;
 use Routee\Helpers\Helpers;
 use Routee\Http\Request;
-use Routee\Http\MiddlewareStack;
-use stdClass;
 
 class Router
 {
