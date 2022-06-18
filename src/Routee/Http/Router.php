@@ -16,9 +16,8 @@ class Router
     private const METHOD_PATCH = "PATCH";
     private const METHOD_PUT = "PUT";
     private const METHOD_DELETE = "DELETE";
-
+    private $uploadSettings = [];
     private $routePath;
-
     private $setPath = null;
 
     public function __construct()
@@ -142,6 +141,16 @@ class Router
         }
         session_start();
     }
+
+
+
+    // file handling 
+    public function uploadSettings($data)
+    {
+        // $this->uploadSettings = $data;
+        $GLOBALS['fileSettings'] = $data;
+    }
+
 
     public function run()
     {

@@ -2,19 +2,23 @@
 
 namespace Routee\Http;
 
+use Routee\Files\FileHelpers;
 use Routee\Helpers\Helpers;
+use stdClass;
 
 class Request
 {
+
     use Helpers;
+    // use FileHelpers;
     // Stores the json content from an incoming request
     public $body = null;
-
+    public $fileSettings = null;
     // Stores the json content from an incoming request
     public $getCurrentPathParams = null;
 
     public $params = null;
-    public $files;
+    public $files = null;
     public $headers = null;
     /**
      * 
@@ -39,7 +43,7 @@ class Request
             $this->cookies = $this->cookies();
             $this->session = $this->session();
             $this->isSure = $this->isSure();
-            // $this->files = $this->files();
+            $this->files = $this->files();
         } catch (\Throwable $e) {
             echo ($e->getMessage()) . " ";
         }
@@ -54,8 +58,13 @@ class Request
 
     private function getRequestBody(): object|null
     {
-        $json = file_get_contents('php://input') ?? null;
-        $object = json_decode($json);
+        $body = null;
+        if (isset($_POST)) {
+            $body = $_POST;
+        } else {
+            $body = file_get_contents('php://input') ?? null;
+        }
+        $object = Helpers::turnToJSON($body);
 
         return ($object) ?? null;
     }
@@ -169,17 +178,53 @@ class Request
         }
         return strtolower($_SERVER['REQUEST_METHOD']) === strtolower($method);
     }
+    public function setUploadSettings($data)
+    {
+        $this->fileSettings = $data;
+    }
     private function files()
     {
-        return isset($_FILES) ? Helpers::turnToJSON($_FILES) : null;
+
+        $this->fileSettings = $GLOBALS['fileSettings'] ?? null;
+        $files = [];
+        if (isset($_FILES)) {
+            foreach ($_FILES as $key => $value) {
+                if (!is_null($this->fileSettings) && count($this->fileSettings) > 0 && array_values($this->fileSettings) != $this->fileSettings) {
+
+                    foreach ($this->fileSettings as $fileKey => $fileValue) {
+                        // append extra file data to the file
+                        $limit =  $this->fileSettings['limits'][$key] ?? null;
+                        $allowedExtension =  $this->fileSettings['allowedExtension'][$key] ?? null;
+                        $destination =  $this->fileSettings['destination'][$key] ?? null;
+                        $renameFiles =  $this->fileSettings['renameFiles'][$key] ?? null;
+
+                        $value['limit'] = $limit;
+                        $value['allowedExtension'] = $allowedExtension;
+                        $value['destination'] = $destination;
+                        $value['renameFiles'] = $renameFiles;
+                    }
+                }
+
+                $data = new \SplFileInfo($value['name']);
+                $value['extension'] = $data->getExtension();
+                $value['newName'] = isset($value['renameFiles']) && $value['renameFiles'] ? Helpers::renameFiles($value['extension']) : null;
+                $value['mimetype'] = ($value['type']);
+                $value['formattedSize'] = Helpers::sizeFilter($value['size']);
+                $files[$key] = $value;
+                unset($value['type']);
+            }
+        }
+        unset($GLOBALS['fileSettings']);
+        return Helpers::turnToJSON($files) ?? null;
     }
+
 
     public function regenerate_session_id($bool = false)
     {
         session_regenerate_id($bool);
     }
 
-    public function session(): object|null
+    private function session(): object|null
     {
         if (!isset($_SESSION)) return null;
         return Helpers::turnToJSON($_SESSION) ?? null;
@@ -189,5 +234,8 @@ class Request
     {
         header("Location: " . $path);
         die;
+    }
+    public function saveFile($validate = null)
+    {
     }
 }

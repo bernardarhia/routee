@@ -50,4 +50,15 @@ trait Helpers
         json_decode($string);
         return json_last_error() === JSON_ERROR_NONE;
     }
+    static public function sizeFilter($bytes)
+    {
+        $label = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
+        for ($i = 0; $bytes >= 1024 && $i < (count($label) - 1); $bytes /= 1024, $i++);
+        return (round($bytes, 2) . " " . $label[$i]);
+    }
+
+    static function renameFiles($extension)
+    {
+        return date('dmYHis') . uniqid() . "." . $extension;
+    }
 }

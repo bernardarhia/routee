@@ -12,7 +12,7 @@ class Response
 
     public function send($data = null)
     {
-        echo (json_encode($data));
+        echo json_encode($data) ?? null;
         return $this;
     }
     public function json($data)
