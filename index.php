@@ -18,20 +18,24 @@ $router->uploadSettings([
         "file" => 2000000,
     ],
     "allowedExtension" => [
-        // "name" => [
-        //     "pic/png" => "png",
-        //     "pic/jpeg" => "jpg",
-        //     "pic/gif" => "gif",
-        // ],
-        "destination" => [
-            "name" => "uploads",
-        ]
+        "file" => ["pic/png", "pic/jpeg", "pic/gif"],
+        "name" => ["pic/png", "pic/jpeg", "pic/gif"],
+    ],
+    "destination" => [
+        "file" => "uploads",
+        "name" => "files"
+    ],
+    "renameFiles" => [
+        "name" => true,
+        "file" => false,
     ]
 ]);
 
-$router->post('/upload', function ($request, Response $response) {
-    $response->send($request->files);
-    // $response->send($request->saveFile(['validate' => true]));
-    // $request->saveFile();
+$router->post('/upload', function (Request $request, Response $response) {
+    if (!$request->files) die($response->statusCode(400)->json(["error" => "No files uploaded"]));
+    $files = $request->files;
+    $file = $files->file;
+    $result = $request->saveFile();
+    $response->send($result);
 });
 $router->run();

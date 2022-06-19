@@ -2,9 +2,7 @@
 
 namespace Routee\Http;
 
-use Routee\Files\FileHelpers;
 use Routee\Helpers\Helpers;
-use stdClass;
 
 class Request
 {
@@ -235,7 +233,48 @@ class Request
         header("Location: " . $path);
         die;
     }
-    public function saveFile($validate = null)
+    public function saveFile($fileIndex = null)
     {
+        $response = [
+            "error" => false,
+            "message" => null,
+            "data" => []
+        ];
+        if (is_null($fileIndex)) {
+            $files = $this->files;
+            foreach ($files as $key => $value) {
+                if (!$value->destination) {
+                    $response['error'] = true;
+                    $response['message'] = "Destination not set";
+                } else {
+                    if (!is_dir($value->destination)) {
+                        mkdir($value->destination, 0777, true);
+                    }
+                    move_uploaded_file($value->tmp_name, $value->destination . "/" . $value->newName ?? $value->name);
+                    $response['data'][$key] = $value;
+                    $response['message'] = "File uploaded successfully";
+                    unset($value->tmp_name);
+                }
+            }
+        } else {
+            // $file
+            $file = json_decode(json_encode($this->files), true);
+            $key = array_keys($file)[$fileIndex - 1];
+
+            $file = Helpers::turnToJSON($file[$key]);
+            if (!$file->destination) {
+                $response['error'] = true;
+                $response['message'] = "Destination not set";
+            } else {
+                if (!is_dir($file->destination)) {
+                    mkdir($file->destination, 0777, true);
+                }
+                move_uploaded_file($file->tmp_name, $file->destination . "/" . $file->newName ?? $file->name);
+                $response['data'] = $file;
+                $response['message'] = "File uploaded successfully";
+                unset($file->tmp_name);
+            }
+        }
+        return Helpers::turnToJSON($response);
     }
 }

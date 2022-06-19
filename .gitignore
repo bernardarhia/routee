@@ -1,2 +1,5 @@
 /vendor
 .gitignore
+.gitmodules
+.idea
+index.html
