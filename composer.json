@@ -10,5 +10,8 @@
         "name":"Bernard Arhia",
         "email":"bernardarhia@gmail.com"
     },
-    "license":"MIT"
+    "license":"MIT",
+    "require" : {
+        "php" : ">=8.1.0"
+    }
 }
