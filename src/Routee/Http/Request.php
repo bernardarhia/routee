@@ -3,8 +3,9 @@
 namespace Routee\Http;
 
 use Routee\Helpers\Helpers;
+use Routee\Validate\Validator;
 
-class Request
+class Request extends Validator
 {
 
     use Helpers;
@@ -47,6 +48,10 @@ class Request
         }
     }
 
+    public function error()
+    {
+        return $this->getError();
+    }
     /**
      * 
      * @return object|bool

@@ -194,8 +194,13 @@ class Router
         }
 
         if (is_array($callback)) {
-            $className = new $callback[0];
-            $callback = [$className, $callback[1]];
+            if (array_values($callback) === $callback) {
+                $className = new $callback[0];
+                $callback = [$className, $callback[1]];
+            } else {
+                $className = new $callback['controller'];
+                $callback = [$className, $callback['action']];
+            }
         }
 
         if (!$callback) {

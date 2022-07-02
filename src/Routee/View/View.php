@@ -19,6 +19,7 @@ class View
             $view = str_replace(".", "/", $view);
         }
         $data = json_decode(json_encode($data));
+        extract((array)$data);
         include static::$path . DIRECTORY_SEPARATOR . $view . ".php";
     }
 

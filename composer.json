@@ -5,12 +5,12 @@
     "keywords": ["routing", "router", "http", "rest", "api", "php", "express php", "express-php"],
     "autoload": {
         "psr-4": {
-            "":"src/"
+            "Routee\\":"src/Routee"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "": "src/"
+            "Routee\\": "src/Routee"
         }
     },
     "author":{
