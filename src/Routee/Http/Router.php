@@ -72,7 +72,7 @@ class Router
         ];
     }
 
-    function setViewPath($path)
+    protected function setViewPath($path)
     {
         $this->setPath = $path;
         $extracted = explode("/", $this->setPath);
@@ -91,7 +91,7 @@ class Router
      * 
      *@param array|object|null $array[]
      *
-     * Array must be a key value pair with the following format
+     * Array or object must be a key value pair with the following format
      * 
      * [
      * 
@@ -166,11 +166,11 @@ class Router
             $path = Helpers::arrangeArray(($request->getCurrentPathParams));
 
             if (count($path) !== count($cutUrls)) continue;
-            if (preg_match_all("/:\w+/i", $handler['path'], $matches)) {
+            if (preg_match_all("/{(.*?)}|:\w+/", $handler['path'], $matches)) {
                 //    find and replace all :param with the value from the
                 $request->params = [];
                 for ($i = 0; $i < count($cutUrls); $i++) {
-                    if (preg_match("/:\w+/i", $cutUrls[$i], $match)) {
+                    if (preg_match("/{(.*?)}|:\w+/", $cutUrls[$i], $match)) {
                         // Store params from query string
                         $param = substr($match[0], 1);
                         $request->params[$param] = $path[$i];
