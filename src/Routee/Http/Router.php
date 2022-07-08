@@ -166,14 +166,22 @@ class Router
             $path = Helpers::arrangeArray(($request->getCurrentPathParams));
 
             if (count($path) !== count($cutUrls)) continue;
-            if (preg_match_all("/{(.*?)}|:\w+/", $handler['path'], $matches)) {
+
+            // matches any route with the pattern :param|{param}|[param]
+
+            if (preg_match_all("/{(.*?)}|(:\w+)|\[(.*?)\]/", $handler['path'], $matches)) {
                 //    find and replace all :param with the value from the
-                $request->params = [];
+
+                $request->params = (object)[];
                 for ($i = 0; $i < count($cutUrls); $i++) {
-                    if (preg_match("/{(.*?)}|:\w+/", $cutUrls[$i], $match)) {
+                    // matches any route with the pattern :param|{param}|[param] that can be found in the $matches
+                    if (preg_match("/{(.*?)}|(:\w+)|\[(.*?)\]/", $cutUrls[$i], $match)) {
                         // Store params from query string
-                        $param = substr($match[0], 1);
-                        $request->params[$param] = $path[$i];
+                        // $param = substr($match[0], 1);
+                        // Replace any {} or : or [] in param
+                        $param = preg_replace("/[{}]|[\[\]]|:/", "", $match[0]);
+                        // $param = preg_replace("/{|}|:/", "", $match[0]);
+                        $request->params->$param = $path[$i];
                     }
                     $handler['path'] = str_replace(($cutUrls[$i]), ($path[$i]), $handler['path']);
                 }
