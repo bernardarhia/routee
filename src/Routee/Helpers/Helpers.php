@@ -2,8 +2,6 @@
 
 namespace Routee\Helpers;
 
-use stdClass;
-
 trait Helpers
 {
     /**
