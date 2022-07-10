@@ -65,10 +65,9 @@ class Request extends Validator
         if (isset($_POST)) {
             $body = $_POST;
         } else {
-            $body = file_get_contents('php://input') ?? null;
+            $body = json_decode(file_get_contents('php://input'), true);
         }
         $object = Helpers::turnToJSON($body);
-
         return ($object) ?? null;
     }
 

@@ -20,17 +20,17 @@ class Router
     private $routePath;
     private $setPath = null;
 
-    public function __construct()
-    {
-        if (is_null($this->setPath)) {
-            $this->setPath();
-        }
-        $this->setViewPath($this->setPath);
-    }
+    // public function __construct()
+    // {
+
+    // }
 
     public function useView(bool $useView): void
     {
         if ($useView) {
+            if (is_null($this->setPath)) {
+                $this->setPath();
+            }
             $this->setViewPath($this->setPath);
         }
     }

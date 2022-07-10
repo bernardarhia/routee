@@ -5,16 +5,15 @@ namespace Routee\Helpers;
 trait Helpers
 {
     /**
-     * @param array $array=[]
+     * @param array|string $data
      * 
      * turnToJSON is a method that turns an array into a json object
      * 
      * @return object|null
      */
-    static function turnToJSON(array $array = []): object|null
+    static function turnToJSON(array $data = null): object|null
     {
-        if (count($array) < 1) return null;
-        return json_decode(json_encode($array)) ?? null;
+        return json_decode(json_encode($data));
     }
     /**
      * 
