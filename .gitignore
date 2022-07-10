@@ -4,4 +4,5 @@
 !src
 !.htaccess
 !*.md
-!.gitignore
+!composer.json
+!composer.lock

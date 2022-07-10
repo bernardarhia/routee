@@ -1,0 +1,25 @@
+{
+    "name":"bernard-arhia/routee",
+    "description": "A very simple and lightweight routing library for PHP.",
+    "type":"library",
+    "keywords": ["routing", "router", "http", "rest", "api", "php", "express php", "express-php"],
+    "autoload": {
+        "psr-4": {
+            "Routee\\":"src/Routee"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Routee\\": "src/Routee"
+        }
+    },
+    "author":{
+        "name":"Bernard Arhia",
+        "email":"bernardarhia@gmail.com",
+        "role":"Developer"
+    },
+    "license":"MIT",
+    "require" : {
+        "php" : "^8.0.0"
+    }
+}
