@@ -27,6 +27,13 @@ class Router
         }
         $this->setViewPath($this->setPath);
     }
+
+    public function useView(bool $useView): void
+    {
+        if ($useView) {
+            $this->setViewPath($this->setPath);
+        }
+    }
     public function get(string $path, $handler, $middleware = [])
     {
         $this->addHandlers(self::METHOD_GET, $this->routePath ? $this->routePath . $path : $path, $handler, $middleware);

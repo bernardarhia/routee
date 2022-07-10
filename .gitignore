@@ -1,0 +1,7 @@
+# Include everything
+/*
+# Exclude
+!src
+!.htaccess
+!*.md
+!.gitignore

@@ -10,6 +10,7 @@ use Routee\View\View;
 require_once __DIR__ . "/vendor/autoload.php";
 
 $router = new Router;
+$router->useView(true);
 
 $router->get(
     "/:id/:hello/:name",
@@ -26,7 +27,5 @@ $router->addNotFoundHandler(function ($request, $response) {
     $response->send("404");
 });
 $router->run();
-
-
 //$string  =  preg_replace('/[^A-Za-z0-9\-]/', '-',$slug_String);
 //$final_string = preg_replace('/-+/','-',$string);
