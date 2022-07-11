@@ -3,9 +3,8 @@
 namespace Routee\Http;
 
 use Routee\Helpers\Helpers;
-use Routee\Validate\Validator;
 
-class Request extends Validator
+class Request
 {
 
     use Helpers;
@@ -13,9 +12,8 @@ class Request extends Validator
     // Stores the json content from an incoming request
     public $body = null;
     public $fileSettings = null;
-    // Stores the json content from an incoming request
-    public $getCurrentPathParams = null;
 
+    // Stores the json content from an incoming request
     public $params = null;
     public $files = null;
     public $headers = null;
@@ -35,23 +33,15 @@ class Request extends Validator
 
     public function __construct()
     {
-        try {
-            $this->body = $this->getRequestBody();
-            $this->getCurrentPathParams = $this->getParams();
-            $this->headers = $this->getRequestHeaders();
-            $this->cookies = $this->cookies();
-            $this->session = $this->session();
-            $this->isSure = $this->isSure();
-            $this->files = $this->files();
-        } catch (\Throwable $e) {
-            echo ($e->getMessage()) . " ";
-        }
+        $this->params = $this->getParams();
+        $this->body = $this->getRequestBody();
+        $this->headers = $this->getRequestHeaders();
+        $this->cookies = $this->cookies();
+        $this->session = $this->session();
+        $this->isSure = $this->isSure();
+        $this->files = $this->files();
     }
 
-    public function error()
-    {
-        return $this->getError();
-    }
     /**
      * 
      * @return object|bool
@@ -62,23 +52,24 @@ class Request extends Validator
     private function getRequestBody(): object|null
     {
         $body = null;
-        if (isset($_POST)) {
+        if (isset($_POST) && count($_POST) > 0) {
             $body = $_POST;
         } else {
-            $body = json_decode(file_get_contents('php://input'), true);
+            $body = json_decode(file_get_contents('php://input'), true) ?? null;
         }
+
         $object = Helpers::turnToJSON($body);
         return ($object) ?? null;
     }
 
 
-    private function getParams()
+    private function getParams(): array
     {
         $urls = explode('/', $_SERVER['REQUEST_URI']);
-        $params = array();
-        for ($i = 0; $i < count($urls); $i++) {
-            if (empty(trim($urls[$i]))) continue;
-            $params[] = trim($urls[$i]);
+        $params = [];
+        foreach ($urls as $key => $value) {
+            if (empty(trim($value))) continue;
+            array_push($params, trim($value));
         }
         return $params;
     }
@@ -189,7 +180,7 @@ class Request extends Validator
 
         $this->fileSettings = $GLOBALS['fileSettings'] ?? null;
         $files = [];
-        if (isset($_FILES)) {
+        if (isset($_FILES) && count($_FILES) > 0) {
             foreach ($_FILES as $key => $value) {
                 if (!is_null($this->fileSettings) && count($this->fileSettings) > 0 && array_values($this->fileSettings) != $this->fileSettings) {
 
@@ -215,9 +206,9 @@ class Request extends Validator
                 $files[$key] = $value;
                 unset($value['type']);
             }
+            unset($GLOBALS['fileSettings']);
+            return Helpers::turnToJSON($files) ?? null;
         }
-        unset($GLOBALS['fileSettings']);
-        return Helpers::turnToJSON($files) ?? null;
     }
 
 

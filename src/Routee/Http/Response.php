@@ -17,7 +17,7 @@ class Response
     }
     public function json($data)
     {
-        // if (!is_array($data) && !is_object($data)) throw new \Exception("This function only accesses arrays or objects, " . gettype($data) . " given", 1);
+        if (!is_array($data) && !is_object($data)) throw new \Exception("This function only accesses arrays or objects, " . gettype($data) . " given", 1);
         echo (json_encode($data));
         return $this;
     }

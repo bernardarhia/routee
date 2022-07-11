@@ -13,7 +13,9 @@ trait Helpers
      */
     static function turnToJSON(array $data = null): object|null
     {
-        return json_decode(json_encode($data));
+
+        $object = json_decode(json_encode($data));
+        return $object ?? null;
     }
     /**
      * 
