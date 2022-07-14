@@ -30,7 +30,7 @@ trait Helpers
      * @return array
      * 
      */
-    static function arrangeArray(array $array): array
+    static function arrangeArray($array): array
     {
 
         $newArray = [];

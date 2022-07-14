@@ -183,7 +183,7 @@ class Router
         $callback = null;
         foreach ($this->handlers as $handler) {
             $method = $_SERVER['REQUEST_METHOD'];
-            $cutUrls = Helpers::arrangeArray((explode("/", $handler['path'])));
+            $cutUrls = Helpers::arrangeArray(explode("/", $handler['path']));
             $path = Helpers::arrangeArray($request->params);
 
             if (count($path) !== count($cutUrls)) continue;
@@ -192,7 +192,7 @@ class Router
 
             if (preg_match_all("/{(.*?)}|(:\w+)|\[(.*?)\]/", $handler['path'], $matches)) {
                 //    find and replace all :param with the value from the
-
+                // print_r($matches);
                 $request->params = (object)[];
                 for ($i = 0; $i < count($cutUrls); $i++) {
                     // matches any route with the pattern :param|{param}|[param] that can be found in the $matches
