@@ -4,13 +4,13 @@ namespace Routee\Http;
 
 class Redirect
 {
-    public function to($url)
+    static public function to($url)
     {
         header("Location: $url");
         exit;
     }
 
-    public function back()
+    static public function back()
     {
         header("Location: " . $_SERVER['HTTP_REFERER']);
         exit;

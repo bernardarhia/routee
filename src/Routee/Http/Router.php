@@ -11,6 +11,7 @@ class Router
 {
     private array $handlers;
     private $notFoundHandler;
+    private $group = null;
     private const METHOD_POST = "POST";
     private const METHOD_GET = "GET";
     private const METHOD_PATCH = "PATCH";
@@ -60,14 +61,34 @@ class Router
         return $this;
     }
 
+    public function group($options = null, $callback)
+    {
+        $request = new Request;
+        $response = new Response;
+
+        // Implementing route routePrefixing
+        if (isset($options['routePrefix'])) {
+            $this->group['routePrefix'] = $options['routePrefix'];
+        }
+
+
+        $callback($request, $response, $this);
+        $this->group = null;
+    }
     public function addNotFoundHandler($handler): void
     {
         $this->notFoundHandler = $handler;
     }
     private function addHandlers(string $method, string $path, $handler): void
     {
+
+        $routePrefixPath = '';
+        if ($this->group && is_array($this->group) && count($this->group) > 0) {
+            $routePrefixPath = $this->group['routePrefix'];
+        }
+
         $this->handlers[$method . $path] = [
-            'path' => $path,
+            'path' => $routePrefixPath . $path,
             'handler' => $handler,
             'method' => $method
         ];
