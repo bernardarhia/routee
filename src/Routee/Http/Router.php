@@ -191,11 +191,24 @@ class Router
             }
         }
 
+        // Add router controller using ClassName@method
+        if (is_string($callback)) {
+            $callback = explode("@", $callback);
+            $callback[0] = new $callback[0];
+            $callback[1] = $callback[1];
+        }
+
+        // Add a route controller using an array [ClassName::class, method]
         if (is_array($callback)) {
             if (array_values($callback) === $callback) {
                 $className = new $callback[0];
                 $callback = [$className, $callback[1]];
             } else {
+                /*Add a route controller using an array [
+                    controller=>ClassName::class,
+                    action=>method
+                ]
+                */
                 $className = new $callback['controller'];
                 $callback = [$className, $callback['action']];
             }
