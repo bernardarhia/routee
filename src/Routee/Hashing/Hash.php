@@ -13,4 +13,8 @@ class Hash
     {
         return password_verify($plainPassword, $hashedPassword);
     }
+    static function rehash($hashedPassword, $options = null)
+    {
+        return password_needs_rehash($hashedPassword, PASSWORD_DEFAULT, $options);
+    }
 }
