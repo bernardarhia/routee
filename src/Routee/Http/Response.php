@@ -17,8 +17,11 @@ class Response
     }
     public function json($data)
     {
-        if (!is_array($data) && !is_object($data)) throw new \Exception("This function only accesses arrays or objects, " . gettype($data) . " given", 1);
-        echo (json_encode($data));
+        // if data is not an object or array throw an error
+        if (!is_object($data) && !is_array($data)) {
+            throw new \Exception("Data must be an object or array");
+        }
+        echo json_encode($data) ?? null;
         return $this;
     }
     public function cookie(

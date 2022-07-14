@@ -3,6 +3,7 @@
 namespace Routee\Http;
 
 use Routee\Helpers\Helpers;
+use Routee\Validate\Validator;
 
 class Request
 {
@@ -271,5 +272,11 @@ class Request
             }
         }
         return Helpers::turnToJSON($response);
+    }
+
+    public function validate($requestBody, $rules, $messages = null)
+    {
+        $validator = new Validator;
+        return $validator->validate($requestBody, $rules, $messages);
     }
 }

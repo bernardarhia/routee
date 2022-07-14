@@ -20,12 +20,14 @@ class Router
     private $routePath;
     private $setPath = null;
 
-    public function __construct()
+    public function useView(bool $bool)
     {
-        if (is_null($this->setPath)) {
-            $this->setPath();
+        if ($bool) {
+            if (is_null($this->setPath)) {
+                $this->setPath();
+            }
+            $this->setViewPath($this->setPath);
         }
-        $this->setViewPath($this->setPath);
     }
     public function get(string $path, $handler, $middleware = [])
     {
@@ -162,7 +164,7 @@ class Router
         foreach ($this->handlers as $handler) {
             $method = $_SERVER['REQUEST_METHOD'];
             $cutUrls = Helpers::arrangeArray((explode("/", $handler['path'])));
-            $path = Helpers::arrangeArray(($request->params));
+            $path = Helpers::arrangeArray($request->params);
 
             if (count($path) !== count($cutUrls)) continue;
 
@@ -179,7 +181,7 @@ class Router
                         // $param = substr($match[0], 1);
                         // Replace any {} or : or [] in param
                         $param = preg_replace("/[{}]|[\[\]]|:/", "", $match[0]);
-                        // $param = preg_replace("/{|}|:/", "", $match[0]);
+
                         $request->params->$param = $path[$i];
                     }
                     $handler['path'] = str_replace(($cutUrls[$i]), ($path[$i]), $handler['path']);

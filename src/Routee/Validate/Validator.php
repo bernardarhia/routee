@@ -8,16 +8,16 @@ class Validator extends Checker
 {
     private $message = [];
     private $error = [];
-    public function validate($inputs, $data, $message = null)
+    public function validate($requestBody, $ruleData, $message = null)
     {
         // turn object into an array
-        if (is_object($data)) {
-            $data = (array) $data;
+        if (is_object($ruleData)) {
+            $ruleData = (array) $ruleData;
         }
-        foreach ($inputs as $inputKey => $value) {
+        foreach ($requestBody as $inputKey => $value) {
             // Value provided by the user
             $inputValue = $value;
-            $rules = $data[$inputKey] ?? null;
+            $rules = $ruleData[$inputKey] ?? null;
             $splittedRules = explode("|", $rules);
             foreach ($splittedRules as $key => $value) {
                 $value = explode(":", $value);
@@ -64,7 +64,7 @@ class Validator extends Checker
                         if (!$this->datetime($inputValue)) $this->writeError($message[$inputKey . ".$rule"] ?? "$inputKey must be a valid datetime.");
                         break;
                     case "required":
-                        if (empty($inputValue)) $this->writeError($message[$inputKey . ".$rule"] ?? "$inputKey required");
+                        if (empty(trim($inputValue))) $this->writeError($message[$inputKey . ".$rule"] ?? "$inputKey required");
                         break;
                     case "min":
                         if (!$this->min($inputValue, $ruleValue)) $this->writeError($message[$inputKey . ".$rule"] ?? "$inputKey should at at least $ruleValue chars long");
@@ -86,7 +86,7 @@ class Validator extends Checker
                         if (!$this->start_with($inputValue, $ruleValue)) $this->writeError($message[$inputKey . ".$rule"] ?? "$inputKey must start with $ruleValue");
                         break;
                     case 'same':
-                        if (!$this->same($inputValue, $inputs[$ruleValue])) $this->writeError($message[$inputKey . ".$rule"] ?? "$inputKey must be same as $ruleValue");
+                        if (!$this->same($inputValue, $requestBody[$ruleValue])) $this->writeError($message[$inputKey . ".$rule"] ?? "$inputKey must be same as $ruleValue");
                         break;
                     case "ip":
                         if (!$this->ip($inputValue)) $this->writeError($message[$inputKey . ".$rule"] ?? "$inputKey must be a valid ip.");
