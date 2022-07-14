@@ -29,33 +29,33 @@ class Router
             $this->setViewPath($this->setPath);
         }
     }
-    public function get(string $path, $handler, $middleware = [])
+    public function get(string $path, $handler)
     {
-        $this->addHandlers(self::METHOD_GET, $this->routePath ? $this->routePath . $path : $path, $handler, $middleware);
+        $this->addHandlers(self::METHOD_GET, $this->routePath ? $this->routePath . $path : $path, $handler);
 
         return $this;
     }
 
-    public function post(string $path, $handler, $middleware = [])
+    public function post(string $path, $handler)
     {
-        $this->addHandlers(self::METHOD_POST, $this->routePath ? $this->routePath . $path : $path, $handler, $middleware);
+        $this->addHandlers(self::METHOD_POST, $this->routePath ? $this->routePath . $path : $path, $handler);
         return $this;
     }
-    public function put(string $path, $handler, $middleware = [])
+    public function put(string $path, $handler)
     {
-        $this->addHandlers(self::METHOD_PUT, $this->routePath ? $this->routePath . $path : $path, $handler, $middleware);
+        $this->addHandlers(self::METHOD_PUT, $this->routePath ? $this->routePath . $path : $path, $handler);
 
         return $this;
     }
-    public function patch(string $path, $handler, $middleware = [])
+    public function patch(string $path, $handler)
     {
-        $this->addHandlers(self::METHOD_PATCH, $this->routePath ? $this->routePath . $path : $path, $handler, $middleware);
+        $this->addHandlers(self::METHOD_PATCH, $this->routePath ? $this->routePath . $path : $path, $handler);
 
         return $this;
     }
-    public function delete(string $path, $handler, $middleware = [])
+    public function delete(string $path, $handler)
     {
-        $this->addHandlers(self::METHOD_DELETE, $this->routePath ? $this->routePath . $path : $path, $handler, $middleware);
+        $this->addHandlers(self::METHOD_DELETE, $this->routePath ? $this->routePath . $path : $path, $handler);
 
         return $this;
     }
@@ -64,13 +64,12 @@ class Router
     {
         $this->notFoundHandler = $handler;
     }
-    private function addHandlers(string $method, string $path, $handler, $middleware = []): void
+    private function addHandlers(string $method, string $path, $handler): void
     {
         $this->handlers[$method . $path] = [
             'path' => $path,
             'handler' => $handler,
-            'method' => $method,
-            'middleware' => $middleware
+            'method' => $method
         ];
     }
 
@@ -189,16 +188,6 @@ class Router
             }
             if ($handler['path'] === $requestPath && $handler['method'] === $method) {
                 $callback = $handler['handler'];
-            }
-
-            // Run middleware if any is in the route params
-            $catch = false;
-            if (count($handler['middleware']) > 0 && array_values($handler['middleware']) !== $handler['middleware']) {
-                foreach ($handler['middleware'] as $middleware_key => $middleware_value) {
-                    $middleware = new $middleware_key();
-                    $catch = $middleware->$middleware_value($request, $response);
-                }
-                if ($catch) die;
             }
         }
 

@@ -48,10 +48,4 @@ The Route accepts the following http request methods
 
 The router accepts basically the following parameters
 * ***(string)*** **$path**: the path of the route
-* ***(string|string[])*** **$middleware**: the middleware to be applied to the route
 * ***(method)*** **$callback**: the callback function to be executed when the route is matched (You can also pass in a class method)
-
-The middleware accepts the following parameters
-- $request - contains data for the incoming request
-- $response - contains data for the outgoing response
-- $next - the next middleware to be executed
