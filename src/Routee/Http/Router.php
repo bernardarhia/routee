@@ -32,36 +32,57 @@ class Router
     }
     public function get(string $path, $handler)
     {
-        $this->addHandlers(self::METHOD_GET, $this->routePath ? $this->routePath . $path : $path, $handler);
+        $routePrefixPath = '';
+        if ($this->group && is_array($this->group) && count($this->group) > 0) {
+            $routePrefixPath = $this->group['routePrefix'];
+        }
 
+
+        $this->addHandlers(self::METHOD_GET,   $this->removeLastSlash($routePrefixPath . $path), $handler);
         return $this;
     }
 
     public function post(string $path, $handler)
     {
-        $this->addHandlers(self::METHOD_POST, $this->routePath ? $this->routePath . $path : $path, $handler);
+        $routePrefixPath = '';
+        if ($this->group && is_array($this->group) && count($this->group) > 0) {
+            $routePrefixPath = $this->group['routePrefix'];
+        }
+        $this->addHandlers(self::METHOD_POST,   $this->removeLastSlash($routePrefixPath . $path), $handler);
         return $this;
     }
     public function put(string $path, $handler)
     {
-        $this->addHandlers(self::METHOD_PUT, $this->routePath ? $this->routePath . $path : $path, $handler);
-
+        $routePrefixPath = '';
+        if ($this->group && is_array($this->group) && count($this->group) > 0) {
+            $routePrefixPath = $this->group['routePrefix'];
+        }
+        $this->addHandlers(self::METHOD_PUT,   $this->removeLastSlash($routePrefixPath . $path), $handler);
+        $this->group = null;
         return $this;
     }
     public function patch(string $path, $handler)
     {
-        $this->addHandlers(self::METHOD_PATCH, $this->routePath ? $this->routePath . $path : $path, $handler);
+        $routePrefixPath = '';
+        if ($this->group && is_array($this->group) && count($this->group) > 0) {
+            $routePrefixPath = $this->group['routePrefix'];
+        }
+        $this->addHandlers(self::METHOD_PATCH,   $this->removeLastSlash($routePrefixPath . $path), $handler);
 
         return $this;
     }
     public function delete(string $path, $handler)
     {
-        $this->addHandlers(self::METHOD_DELETE, $this->routePath ? $this->routePath . $path : $path, $handler);
+        $routePrefixPath = '';
+        if ($this->group && is_array($this->group) && count($this->group) > 0) {
+            $routePrefixPath = $this->group['routePrefix'];
+        }
+        $this->addHandlers(self::METHOD_DELETE,   $this->removeLastSlash($routePrefixPath . $path), $handler);
 
         return $this;
     }
 
-    public function group($options = null, $callback)
+    public function group($options = null, callable $callback)
     {
         $request = new Request;
         $response = new Response;
@@ -70,7 +91,6 @@ class Router
         if (isset($options['routePrefix'])) {
             $this->group['routePrefix'] = $options['routePrefix'];
         }
-
 
         $callback($request, $response, $this);
         $this->group = null;
@@ -82,13 +102,9 @@ class Router
     private function addHandlers(string $method, string $path, $handler): void
     {
 
-        $routePrefixPath = '';
-        if ($this->group && is_array($this->group) && count($this->group) > 0) {
-            $routePrefixPath = $this->group['routePrefix'];
-        }
 
         $this->handlers[$method . $path] = [
-            'path' => $routePrefixPath . $path,
+            'path' =>  $path,
             'handler' => $handler,
             'method' => $method
         ];
@@ -107,6 +123,12 @@ class Router
     {
         if (!file_exists($_SERVER['DOCUMENT_ROOT'] . "/views")) mkdir($_SERVER['DOCUMENT_ROOT'] . "/views");
         $this->setPath = $_SERVER['DOCUMENT_ROOT'] . "/views";
+    }
+    private function removeLastSlash($route)
+    {
+        // remove last slash from the route if length is greater than 1 
+        if (strlen($route) > 1  && $route[strlen($route) - 1] == "/") return substr($route, 0, -1);
+        return $route;
     }
 
     /**
@@ -181,42 +203,47 @@ class Router
         $requestUri = parse_url($_SERVER['REQUEST_URI']);
         $requestPath = $requestUri['path'];
         $callback = null;
+
         foreach ($this->handlers as $handler) {
+            // echo $handler['path'] . "<br>";
+
             $method = $_SERVER['REQUEST_METHOD'];
             $cutUrls = Helpers::arrangeArray(explode("/", $handler['path']));
             $path = Helpers::arrangeArray($request->params);
 
+
             if (count($path) !== count($cutUrls)) continue;
 
-            // matches any route with the pattern :param|{param}|[param]
 
+            // matches any route with the pattern :param|{param}|[param]
             if (preg_match_all("/{(.*?)}|(:\w+)|\[(.*?)\]/", $handler['path'], $matches)) {
                 //    find and replace all :param with the value from the
-                // print_r($matches);
+                $param = null;
                 $request->params = (object)[];
                 for ($i = 0; $i < count($cutUrls); $i++) {
                     // matches any route with the pattern :param|{param}|[param] that can be found in the $matches
                     if (preg_match("/{(.*?)}|(:\w+)|\[(.*?)\]/", $cutUrls[$i], $match)) {
                         // Store params from query string
-                        // $param = substr($match[0], 1);
-                        // Replace any {} or : or [] in param
                         $param = preg_replace("/[{}]|[\[\]]|:/", "", $match[0]);
-
                         $request->params->$param = $path[$i];
                     }
-                    $handler['path'] = str_replace(($cutUrls[$i]), ($path[$i]), $handler['path']);
+
+                    $handler['path'] = str_replace($cutUrls[$i], $path[$i], $handler['path']);
                 }
-            }
-            if ($handler['path'] === $requestPath && $handler['method'] === $method) {
+            } else  $request->params = null;
+
+
+            if ($handler['path'] == $requestPath && $handler['method'] == $method) {
                 $callback = $handler['handler'];
+                break;
             }
         }
 
         // Add router controller using ClassName@method
         if (is_string($callback)) {
-            $callback = explode("@", $callback);
-            $callback[0] = new $callback[0];
-            $callback[1] = $callback[1];
+            $newCallback = explode("@", $callback);
+            $callback[0] = new $newCallback[0];
+            $callback[1] = $newCallback[1];
         }
 
         // Add a route controller using an array [ClassName::class, method]
