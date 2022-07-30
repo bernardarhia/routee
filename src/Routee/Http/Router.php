@@ -82,7 +82,7 @@ class Router
         return $this;
     }
 
-    public function group($options = null, callable $callback)
+    public function group($options = null, callable $callback = null)
     {
         $request = new Request;
         $response = new Response;
@@ -204,36 +204,47 @@ class Router
         $requestPath = $requestUri['path'];
         $callback = null;
 
+        $pa = $request->params;
+        echo "<pre>";
         foreach ($this->handlers as $handler) {
-            // echo $handler['path'] . "<br>";
 
             $method = $_SERVER['REQUEST_METHOD'];
             $cutUrls = Helpers::arrangeArray(explode("/", $handler['path']));
-            $path = Helpers::arrangeArray($request->params);
-
+            $path = Helpers::arrangeArray($pa);
 
             if (count($path) !== count($cutUrls)) continue;
-
 
             // matches any route with the pattern :param|{param}|[param]
             if (preg_match_all("/{(.*?)}|(:\w+)|\[(.*?)\]/", $handler['path'], $matches)) {
                 //    find and replace all :param with the value from the
                 $param = null;
                 $request->params = (object)[];
+                $newUrl = [];
+                $newFormedUrl = "";
                 for ($i = 0; $i < count($cutUrls); $i++) {
                     // matches any route with the pattern :param|{param}|[param] that can be found in the $matches
-                    if (preg_match("/{(.*?)}|(:\w+)|\[(.*?)\]/", $cutUrls[$i], $match)) {
-                        // Store params from query string
+                    if (preg_match("/{(.*?)}|(:\w+)|\[(.*?)\]/", $cutUrls[$i], $match)) {                        // Store params from query string
                         $param = preg_replace("/[{}]|[\[\]]|:/", "", $match[0]);
-                        $request->params->$param = $path[$i];
-                    }
+                        if (!empty($param)) {
+                            $request->params->$param = $path[$i];
+                        }
+                        $indexedParam = array_search($match[0], $cutUrls);
 
-                    $handler['path'] = str_replace($cutUrls[$i], $path[$i], $handler['path']);
+                        $splittedUrl = explode("/", $handler['path']);
+                        foreach ($splittedUrl as $splitted) {
+                            if (!empty($splitted)) $newUrl[] = $splitted;
+                        }
+                        $newUrl[$indexedParam] = $path[$i];
+                        $newFormedUrl = "/" . implode("/", $newUrl);
+                        $handler['path'] = $newFormedUrl;
+
+                        // reset newly formed url and newUrl
+                        $newUrl = [];
+                        $newFormedUrl = "";
+                    }
                 }
             } else  $request->params = null;
-
-
-            if ($handler['path'] == $requestPath && $handler['method'] == $method) {
+            if ($handler['path'] === $requestPath && $handler['method'] === $method) {
                 $callback = $handler['handler'];
                 break;
             }
@@ -241,9 +252,9 @@ class Router
 
         // Add router controller using ClassName@method
         if (is_string($callback)) {
-            $newCallback = explode("@", $callback);
-            $callback[0] = new $newCallback[0];
-            $callback[1] = $newCallback[1];
+            $callback = explode("@", $callback);
+            $callback[0] = new $callback[0];
+            $callback[1] = $callback[1];
         }
 
         // Add a route controller using an array [ClassName::class, method]
