@@ -225,9 +225,10 @@ class Router
                     // matches any route with the pattern :param|{param}|[param] that can be found in the $matches
                     if (preg_match("/{(.*?)}|(:\w+)|\[(.*?)\]/", $cutUrls[$i], $match)) {                        // Store params from query string
                         $param = preg_replace("/[{}]|[\[\]]|:/", "", $match[0]);
-                        if (!empty($param)) {
-                            $request->params->$param = $path[$i];
-                        }
+
+                        $request->params->$param = $path[$i];
+
+
                         $indexedParam = array_search($match[0], $cutUrls);
 
                         $splittedUrl = explode("/", $handler['path']);
@@ -243,7 +244,7 @@ class Router
                         $newFormedUrl = "";
                     }
                 }
-            } else  $request->params = null;
+            }
             if ($handler['path'] === $requestPath && $handler['method'] === $method) {
                 $callback = $handler['handler'];
                 break;
