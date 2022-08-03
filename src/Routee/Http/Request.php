@@ -246,7 +246,11 @@ class Request
                     if (!is_dir($value->destination)) {
                         mkdir($value->destination, 0777, true);
                     }
-                    move_uploaded_file($value->tmp_name, $value->destination . "/" . $value->newName ?? $value->name);
+                    // die(json_encode([$key, $value]));
+                    $fileName =  !$value->newName || empty($value->newName) ? $value->name : $value->newName;
+                    // die($fileName);
+
+                    move_uploaded_file($value->tmp_name, $value->destination . "/" . $fileName);
                     $response['data'][$key] = $value;
                     $response['message'] = "File uploaded successfully";
                     unset($value->tmp_name);
@@ -265,7 +269,9 @@ class Request
                 if (!is_dir($file->destination)) {
                     mkdir($file->destination, 0777, true);
                 }
-                move_uploaded_file($file->tmp_name, $file->destination . "/" . $file->newName ?? $file->name);
+                $fileName = !$file->newName || empty($file->newName) ? $file->name : $file->newName;
+
+                move_uploaded_file($file->tmp_name, $file->destination . "/" . $fileName);
                 $response['data'] = $file;
                 $response['message'] = "File uploaded successfully";
                 unset($file->tmp_name);
