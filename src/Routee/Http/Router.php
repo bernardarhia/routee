@@ -30,15 +30,19 @@ class Router
             $this->setViewPath($this->setPath);
         }
     }
-    public function get(string $path, $handler)
+    public function get(string $path, $handler, $middleware = null)
     {
         $routePrefixPath = '';
         if ($this->group && is_array($this->group) && count($this->group) > 0) {
             $routePrefixPath = $this->group['routePrefix'];
         }
 
-
-        $this->addHandlers(self::METHOD_GET,   $this->removeLastSlash($routePrefixPath . $path), $handler);
+        $middlewareStack = null;
+        if (isset($middleware) && !is_null($middleware)) {
+            $middlewareStack = $middleware;
+            $this->addHandlers(self::METHOD_GET,   $this->removeLastSlash($routePrefixPath . $path), $handler, $middlewareStack['middleware']);
+        } else
+            $this->addHandlers(self::METHOD_GET,   $this->removeLastSlash($routePrefixPath . $path), $handler);
         return $this;
     }
 
@@ -99,14 +103,15 @@ class Router
     {
         $this->notFoundHandler = $handler;
     }
-    private function addHandlers(string $method, string $path, $handler): void
+    private function addHandlers(string $method, string $path, $handler, $middleware = null): void
     {
 
 
         $this->handlers[$method . $path] = [
             'path' =>  $path,
             'handler' => $handler,
-            'method' => $method
+            'method' => $method,
+            "middleware" => $middleware
         ];
     }
 
@@ -205,7 +210,6 @@ class Router
         $callback = null;
 
         $pa = $request->params;
-        echo "<pre>";
         foreach ($this->handlers as $handler) {
 
             $method = $_SERVER['REQUEST_METHOD'];
@@ -247,6 +251,16 @@ class Router
             }
             if ($handler['path'] === $requestPath && $handler['method'] === $method) {
                 $callback = $handler['handler'];
+
+                // run middleware here
+                $middlewareRun = [];
+                if (isset($handler['middleware'])) {
+                    $middlewareRun = $handler['middleware'];
+                }
+                foreach ($middlewareRun as $middleware) {
+                    $m =  new $middleware($this, $request, $response);
+                    $m->add($middleware);
+                }
                 break;
             }
         }

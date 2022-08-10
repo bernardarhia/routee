@@ -1,21 +1,25 @@
 <?php
 
+namespace Routee\Middlewares;
+
 use Routee\Http\Request;
+use Routee\Http\Response;
 use Routee\Http\Router;
 
 class RouteeMiddleware
 {
-    private $middleware;
-    private $stack = [];
-    private $router;
-    private $request;
-    private $next;
+    protected $middleware;
+    protected $stack = [];
+    protected $router;
+    protected $request;
+    protected $response;
+    protected $next;
 
-
-    public function __construct(Router $router, Request $request)
+    public function __construct(Router $router, Request $request, Response $response)
     {
         $this->router = $router;
         $this->request = $request;
+        $this->response = $response;
     }
 
     public function add(string $middleware)
