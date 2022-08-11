@@ -46,43 +46,60 @@ class Router
         return $this;
     }
 
-    public function post(string $path, $handler)
+    public function post(string $path, $handler, $middleware = null)
     {
         $routePrefixPath = '';
         if ($this->group && is_array($this->group) && count($this->group) > 0) {
             $routePrefixPath = $this->group['routePrefix'];
         }
-        $this->addHandlers(self::METHOD_POST,   $this->removeLastSlash($routePrefixPath . $path), $handler);
+        $middlewareStack = null;
+        if (isset($middleware) && !is_null($middleware)) {
+            $middlewareStack = $middleware;
+            $this->addHandlers(self::METHOD_POST,   $this->removeLastSlash($routePrefixPath . $path), $handler, $middlewareStack['middleware']);
+        } else
+            $this->addHandlers(self::METHOD_POST,   $this->removeLastSlash($routePrefixPath . $path), $handler);
         return $this;
     }
-    public function put(string $path, $handler)
+    public function put(string $path, $handler, $middleware = null)
     {
         $routePrefixPath = '';
         if ($this->group && is_array($this->group) && count($this->group) > 0) {
             $routePrefixPath = $this->group['routePrefix'];
         }
-        $this->addHandlers(self::METHOD_PUT,   $this->removeLastSlash($routePrefixPath . $path), $handler);
-        $this->group = null;
+        $middlewareStack = null;
+        if (isset($middleware) && !is_null($middleware)) {
+            $middlewareStack = $middleware;
+            $this->addHandlers(self::METHOD_PUT,   $this->removeLastSlash($routePrefixPath . $path), $handler, $middlewareStack['middleware']);
+        } else
+            $this->addHandlers(self::METHOD_PUT,   $this->removeLastSlash($routePrefixPath . $path), $handler);
         return $this;
     }
-    public function patch(string $path, $handler)
+    public function patch(string $path, $handler, $middleware = null)
     {
         $routePrefixPath = '';
         if ($this->group && is_array($this->group) && count($this->group) > 0) {
             $routePrefixPath = $this->group['routePrefix'];
         }
-        $this->addHandlers(self::METHOD_PATCH,   $this->removeLastSlash($routePrefixPath . $path), $handler);
-
+        $middlewareStack = null;
+        if (isset($middleware) && !is_null($middleware)) {
+            $middlewareStack = $middleware;
+            $this->addHandlers(self::METHOD_PATCH,   $this->removeLastSlash($routePrefixPath . $path), $handler, $middlewareStack['middleware']);
+        } else
+            $this->addHandlers(self::METHOD_PATCH,   $this->removeLastSlash($routePrefixPath . $path), $handler);
         return $this;
     }
-    public function delete(string $path, $handler)
+    public function delete(string $path, $handler, $middleware = null)
     {
         $routePrefixPath = '';
         if ($this->group && is_array($this->group) && count($this->group) > 0) {
             $routePrefixPath = $this->group['routePrefix'];
         }
-        $this->addHandlers(self::METHOD_DELETE,   $this->removeLastSlash($routePrefixPath . $path), $handler);
-
+        $middlewareStack = null;
+        if (isset($middleware) && !is_null($middleware)) {
+            $middlewareStack = $middleware;
+            $this->addHandlers(self::METHOD_DELETE,   $this->removeLastSlash($routePrefixPath . $path), $handler, $middlewareStack['middleware']);
+        } else
+            $this->addHandlers(self::METHOD_DELETE,   $this->removeLastSlash($routePrefixPath . $path), $handler);
         return $this;
     }
 
@@ -258,8 +275,8 @@ class Router
                     $middlewareRun = $handler['middleware'];
                 }
                 foreach ($middlewareRun as $middleware) {
-                    $m =  new $middleware($this, $request, $response);
-                    $m->add($middleware);
+                    $m =  new $middleware;
+                    $m->run($request, $response);
                 }
                 break;
             }
