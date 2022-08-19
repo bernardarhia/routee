@@ -20,6 +20,7 @@ class Router
     private $uploadSettings = [];
     private $routePath;
     private $setPath = null;
+    private $middleware = [];
 
     public function useView(bool $bool)
     {
@@ -37,12 +38,12 @@ class Router
             $routePrefixPath = $this->group['routePrefix'];
         }
 
-        $middlewareStack = null;
-        if (isset($middleware) && !is_null($middleware)) {
-            $middlewareStack = $middleware;
-            $this->addHandlers(self::METHOD_GET,   $this->removeLastSlash($routePrefixPath . $path), $handler, $middlewareStack['middleware']);
-        } else
-            $this->addHandlers(self::METHOD_GET,   $this->removeLastSlash($routePrefixPath . $path), $handler);
+        // $middlewareStack = null;
+        // if (isset($middleware) && !is_null($middleware)) {
+        //     $middlewareStack = $middleware;
+        //     $this->addHandlers(self::METHOD_GET,   $this->removeLastSlash($routePrefixPath . $path), $handler, $middlewareStack['middleware']);
+        // } else
+        //     $this->addHandlers(self::METHOD_GET,   $this->removeLastSlash($routePrefixPath . $path), $handler);
         return $this;
     }
 
@@ -112,6 +113,9 @@ class Router
         if (isset($options['routePrefix'])) {
             $this->group['routePrefix'] = $options['routePrefix'];
         }
+        if (isset($options['middleware'])) {
+            $this->group['middleware'] =  $options['middleware'];
+        }
 
         $callback($request, $response, $this);
         $this->group = null;
@@ -122,8 +126,6 @@ class Router
     }
     private function addHandlers(string $method, string $path, $handler, $middleware = null): void
     {
-
-
         $this->handlers[$method . $path] = [
             'path' =>  $path,
             'handler' => $handler,
@@ -213,25 +215,26 @@ class Router
     // file handling 
     public function uploadSettings($data)
     {
-        // $this->uploadSettings = $data;
+
         $GLOBALS['fileSettings'] = $data;
     }
-
-
     public function run()
     {
+
         $request = new Request();
         $response = new Response();
         $requestUri = parse_url($_SERVER['REQUEST_URI']);
         $requestPath = $requestUri['path'];
         $callback = null;
 
-        $pa = $request->params;
+        $pa = $request->urlParams;
+
+
         foreach ($this->handlers as $handler) {
 
             $method = $_SERVER['REQUEST_METHOD'];
             $cutUrls = Helpers::arrangeArray(explode("/", $handler['path']));
-            $path = Helpers::arrangeArray($pa);
+            $path = Helpers::arrangeArray((array)$pa);
 
             if (count($path) !== count($cutUrls)) continue;
 
@@ -247,8 +250,6 @@ class Router
                     if (preg_match("/{(.*?)}|(:\w+)|\[(.*?)\]/", $cutUrls[$i], $match)) {                        // Store params from query string
                         $param = preg_replace("/[{}]|[\[\]]|:/", "", $match[0]);
 
-                        $request->params->$param = $path[$i];
-
 
                         $indexedParam = array_search($match[0], $cutUrls);
 
@@ -263,31 +264,38 @@ class Router
                         // reset newly formed url and newUrl
                         $newUrl = [];
                         $newFormedUrl = "";
+                        if (!empty($param) && strlen($param) > 0 && $handler['path'] === $requestPath) {
+                            $request->params->$param = $path[$i];
+                        }
                     }
                 }
             }
+            // print_r($cutUrls) . "\n";
             if ($handler['path'] === $requestPath && $handler['method'] === $method) {
                 $callback = $handler['handler'];
 
                 // run middleware here
-                $middlewareRun = [];
-                if (isset($handler['middleware'])) {
-                    $middlewareRun = $handler['middleware'];
-                }
-                foreach ($middlewareRun as $middleware) {
-                    $m =  new $middleware;
-                    $m->run($request, $response);
-                }
+                // $middlewareRun = [];
+                // if (isset($handler['middleware'])) {
+                //     $middlewareRun = $handler['middleware'];
+                // }
+                // foreach ($middlewareRun as $middleware) {
+                //     $m =  new $middleware;
+                //     $m->run($request, $response);
+                // }
                 break;
             }
         }
 
+
+        // Call middleware here
+
         // Add router controller using ClassName@method
-        if (is_string($callback)) {
-            $callback = explode("@", $callback);
-            $callback[0] = new $callback[0];
-            $callback[1] = $callback[1];
-        }
+        // if (is_string($callback)) {
+        //     $exploded = explode("@", $callback);
+        //     $className = new $exploded[0];
+        //     $callback = [$className, $exploded[1]];
+        // }
 
         // Add a route controller using an array [ClassName::class, method]
         if (is_array($callback)) {
@@ -304,7 +312,6 @@ class Router
                 $callback = [$className, $callback['action']];
             }
         }
-
         if (!$callback) {
             http_response_code(404);
             if (!empty($this->notFoundHandler)) {
@@ -314,5 +321,6 @@ class Router
         call_user_func_array($callback, [
             $request, $response
         ]);
+        $request->params = (object)[];
     }
 }

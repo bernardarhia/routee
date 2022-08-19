@@ -43,6 +43,15 @@ class Request
         $this->files = $this->files();
     }
 
+    public function input($key = null)
+    {
+        if (empty($key)) {
+            return $this->body;
+        }
+        if ($key &&  $this->body?->$key) {
+            return $this->body?->$key;
+        }
+    }
     /**
      * 
      * @return object|bool
