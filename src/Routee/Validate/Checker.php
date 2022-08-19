@@ -1,6 +1,6 @@
 <?php
 
-namespace Routee\Validate;
+namespace Glee\Validate;
 
 
 class Checker
@@ -16,7 +16,7 @@ class Checker
     }
     protected function phone($value)
     {
-        return preg_match('/^\+?[0-9]{10,15}$/', $value);
+        return preg_match('/^(\([0-9]{3}\)|[0-9]{3}-)[0-9]{3}-[0-9]{4}$/', $value);
     }
     protected function integer($value)
     {
@@ -28,7 +28,7 @@ class Checker
     }
     protected function float($value)
     {
-        return is_float($value);
+        return is_float((float)$value);
     }
     protected function array($value)
     {
@@ -78,10 +78,17 @@ class Checker
     {
         return strlen($value) <= $max;
     }
+    protected function least($value, $num)
+    {
+        return $value >= $num;
+    }
+    protected function most($value, $num)
+    {
+        return $value == $num;
+    }
     protected function in($value, $in)
     {
-        $data = trim($in, "()");
-        $dataSplitted = explode(",", $data);
+        $dataSplitted = explode(",", $in);
         return in_array($value, $dataSplitted);
     }
     protected function between($value, $between)
@@ -92,7 +99,7 @@ class Checker
     }
     protected function alphanumeric($value)
     {
-        return preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $value);
+        return preg_match('/^\S*(?=\S{8,})(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$/', $value);
     }
     protected function start_with($value, $start_with)
     {
@@ -149,5 +156,52 @@ class Checker
     protected function eq($value, $eq)
     {
         return $value == $eq;
+    }
+    protected function neq($value, $neq)
+    {
+        return $value != $neq;
+    }
+    protected function after($value, $after)
+    {
+        return strtotime($value) > strtotime($after);
+    }
+    protected function after_or_equal($value, $after_or_equal)
+    {
+        return strtotime($value) >= strtotime($after_or_equal);
+    }
+    protected function before($value, $before)
+    {
+        return strtotime($value) < strtotime($before);
+    }
+    protected function before_or_equal($value, $before_or_equal)
+    {
+        return strtotime($value) <= strtotime($before_or_equal);
+    }
+    protected function between_dates($value, $between_date)
+    {
+        $between_date = trim($between_date, "()");
+        $between_dateSplitted = explode(",", $between_date);
+        $date1 = strtotime($between_dateSplitted[0]);
+        $date2 = strtotime($between_dateSplitted[1]);
+        $date = strtotime($value);
+        return $date >= $date1 && $date <= $date2;
+    }
+    protected function between_times($value, $between_time)
+    {
+        $between_time = trim($between_time, "()");
+        $between_timeSplitted = explode(",", $between_time);
+        $time1 = strtotime($between_timeSplitted[0]);
+        $time2 = strtotime($between_timeSplitted[1]);
+        $time = strtotime($value);
+        return $time >= $time1 && $time <= $time2;
+    }
+    protected function between_datetimes($value, $between_datetime)
+    {
+        $between_datetime = trim($between_datetime, "()");
+        $between_datetimeSplitted = explode(",", $between_datetime);
+        $date1 = strtotime($between_datetimeSplitted[0]);
+        $date2 = strtotime($between_datetimeSplitted[1]);
+        $time = strtotime($value);
+        return $time >= $date1 && $time <= $date2;
     }
 }

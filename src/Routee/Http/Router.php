@@ -34,16 +34,23 @@ class Router
     public function get(string $path, $handler, $middleware = null)
     {
         $routePrefixPath = '';
+        $middlewareStack = [];
         if ($this->group && is_array($this->group) && count($this->group) > 0) {
             $routePrefixPath = $this->group['routePrefix'];
+            if (isset($this->group['middleware']) && is_array($this->group['middleware'])) {
+                $middlewareStack = [...$middlewareStack, ...$this->group['middleware']];
+            } else if (isset($this->group['middleware']) && is_string($this->group['middleware'])) {
+                array_push($middlewareStack, $this->group['middleware']);
+            }
         }
 
-        // $middlewareStack = null;
-        // if (isset($middleware) && !is_null($middleware)) {
-        //     $middlewareStack = $middleware;
-        //     $this->addHandlers(self::METHOD_GET,   $this->removeLastSlash($routePrefixPath . $path), $handler, $middlewareStack['middleware']);
-        // } else
-        //     $this->addHandlers(self::METHOD_GET,   $this->removeLastSlash($routePrefixPath . $path), $handler);
+        if (isset($middleware['middleware']) && is_array($middleware['middleware'])) {
+            $middlewareStack = [...$middlewareStack, ...$middleware['middleware']];
+        } else if (isset($middleware['middleware']) && is_string($middleware['middleware'])) {
+            array_push($middlewareStack, $middleware['middleware']);
+        }
+
+        $this->addHandlers(self::METHOD_GET,   $this->removeLastSlash($routePrefixPath . $path), $handler, $middlewareStack);
         return $this;
     }
 
@@ -114,7 +121,7 @@ class Router
             $this->group['routePrefix'] = $options['routePrefix'];
         }
         if (isset($options['middleware'])) {
-            $this->group['middleware'] =  $options['middleware'];
+            $this->group['middleware'] = $options['middleware'];
         }
 
         $callback($request, $response, $this);
@@ -126,6 +133,7 @@ class Router
     }
     private function addHandlers(string $method, string $path, $handler, $middleware = null): void
     {
+        // $this->group = null;
         $this->handlers[$method . $path] = [
             'path' =>  $path,
             'handler' => $handler,
@@ -270,19 +278,17 @@ class Router
                     }
                 }
             }
-            // print_r($cutUrls) . "\n";
             if ($handler['path'] === $requestPath && $handler['method'] === $method) {
                 $callback = $handler['handler'];
-
-                // run middleware here
-                // $middlewareRun = [];
-                // if (isset($handler['middleware'])) {
-                //     $middlewareRun = $handler['middleware'];
-                // }
-                // foreach ($middlewareRun as $middleware) {
-                //     $m =  new $middleware;
-                //     $m->run($request, $response);
-                // }
+                // // run middleware here
+                $middlewareRun = [];
+                if (isset($handler['middleware'])) {
+                    $middlewareRun = $handler['middleware'];
+                }
+                foreach ($middlewareRun as $middleware) {
+                    $m =  new $middleware;
+                    $m->run($request, $response);
+                }
                 break;
             }
         }

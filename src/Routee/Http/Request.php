@@ -16,6 +16,7 @@ class Request
 
     // Stores the json content from an incoming request
     public $params = null;
+    public $urlParams = null;
     public $files = null;
     public $headers = null;
     /**
@@ -34,7 +35,7 @@ class Request
 
     public function __construct()
     {
-        $this->params = $this->getParams();
+        $this->urlParams = $this->getParams();
         $this->body = $this->getRequestBody();
         $this->headers = $this->getRequestHeaders();
         $this->cookies = $this->cookies();
@@ -43,15 +44,6 @@ class Request
         $this->files = $this->files();
     }
 
-    public function input($key = null)
-    {
-        if (empty($key)) {
-            return $this->body;
-        }
-        if ($key &&  $this->body?->$key) {
-            return $this->body?->$key;
-        }
-    }
     /**
      * 
      * @return object|bool
@@ -69,11 +61,26 @@ class Request
         }
 
         $object = Helpers::turnToJSON($body);
+
+        // loop through the object and secure the inputs
+        if (is_object($object)) {
+            foreach ($object as $key => $value) {
+                $object->$key = $value;
+            }
+        }
         return ($object) ?? null;
     }
 
+    function secureInput($value)
+    {
+        // if (is_array($value)) {
+        //     foreach ($value as $key => $value) {
+        //         if (!empty($value) && is_string($value)) $value[$key] = $this->secureInput(strip_tags($value));
+        //     }
+        // }
+    }
 
-    private function getParams(): array
+    private function getParams(): object
     {
         $urls = explode('/', $_SERVER['REQUEST_URI']);
         $params = [];
@@ -81,7 +88,7 @@ class Request
             if (empty(trim($value))) continue;
             array_push($params, trim($value));
         }
-        return $params;
+        return (object) $params;
     }
 
     /**
@@ -190,10 +197,10 @@ class Request
 
         $this->fileSettings = $GLOBALS['fileSettings'] ?? null;
         $files = [];
+        $limit = null;
         if (isset($_FILES) && count($_FILES) > 0) {
             foreach ($_FILES as $key => $value) {
                 if (!is_null($this->fileSettings) && count($this->fileSettings) > 0 && array_values($this->fileSettings) != $this->fileSettings) {
-
                     foreach ($this->fileSettings as $fileKey => $fileValue) {
                         // append extra file data to the file
                         $limit =  $this->fileSettings['limits'][$key] ?? null;
@@ -213,6 +220,7 @@ class Request
                 $value['newName'] = isset($value['renameFiles']) && $value['renameFiles'] ? Helpers::renameFiles($value['extension']) : null;
                 $value['mimetype'] = ($value['type']);
                 $value['formattedSize'] = Helpers::sizeFilter($value['size']);
+                $value['formattedLimitSize'] = Helpers::sizeFilter($limit);
                 $files[$key] = $value;
                 unset($value['type']);
             }
@@ -227,7 +235,7 @@ class Request
         session_regenerate_id($bool);
     }
 
-    private function session(): object|null
+    public function session(): object|null
     {
         if (!isset($_SESSION)) return null;
         return Helpers::turnToJSON($_SESSION) ?? null;
@@ -247,22 +255,34 @@ class Request
         ];
         if (is_null($fileIndex)) {
             $files = $this->files;
-            foreach ($files as $key => $value) {
-                if (!$value->destination) {
-                    $response['error'] = true;
-                    $response['message'] = "Destination not set";
-                } else {
-                    if (!is_dir($value->destination)) {
-                        mkdir($value->destination, 0777, true);
+            if ($files) {
+                foreach ($files as $key => $value) {
+                    if (!$value->destination) {
+                        $response['error'] = true;
+                        $response['message'] = "Destination not set";
+                    } else {
+                        if (!is_dir($value->destination)) {
+                            mkdir($value->destination, 0777, true);
+                        }
+                        // die(json_encode([$key, $value]));
+                        $fileName =  !$value->newName || empty($value->newName) ? $value->name : $value->newName;
                     }
-                    // die(json_encode([$key, $value]));
-                    $fileName =  !$value->newName || empty($value->newName) ? $value->name : $value->newName;
-                    // die($fileName);
-
-                    move_uploaded_file($value->tmp_name, $value->destination . "/" . $fileName);
-                    $response['data'][$key] = $value;
-                    $response['message'] = "File uploaded successfully";
-                    unset($value->tmp_name);
+                    if ($value->allowedExtension && is_array($value->allowedExtension)) {
+                        if (!in_array($value->mimetype, $value->allowedExtension)) {
+                            $response['error'] = true;
+                            $response['message'] =  "Invalid file extension ." . $value->mimetype;
+                        }
+                    }
+                    if ($value->size > $value->limit) {
+                        $response['error'] = true;
+                        $response['message'] =  "File is too large. maximum upload size should be " . $value->formattedLimitSize;
+                    }
+                    if (!$response['error']) {
+                        move_uploaded_file($value->tmp_name, $value->destination . "/" . $fileName);
+                        $response['data'][$key] = $value;
+                        $response['message'] = "File uploaded successfully";
+                        unset($value->tmp_name);
+                    }
                 }
             }
         } else {
@@ -271,20 +291,22 @@ class Request
             $key = array_keys($file)[$fileIndex - 1];
 
             $file = Helpers::turnToJSON($file[$key]);
-            if (!$file->destination) {
-                $response['error'] = true;
-                $response['message'] = "Destination not set";
-            } else {
-                if (!is_dir($file->destination)) {
-                    mkdir($file->destination, 0777, true);
-                }
-                $fileName = !$file->newName || empty($file->newName) ? $file->name : $file->newName;
+            if ($file) {
+                if (!$file->destination) {
+                    $response['error'] = true;
+                    $response['message'] = "Destination not set";
+                } else {
+                    if (!is_dir($file->destination)) {
+                        mkdir($file->destination, 0777, true);
+                    }
+                    $fileName = !$file->newName || empty($file->newName) ? $file->name : $file->newName;
 
-                move_uploaded_file($file->tmp_name, $file->destination . "/" . $fileName);
-                $response['data'] = $file;
-                $response['message'] = "File uploaded successfully";
-                unset($file->tmp_name);
+                    move_uploaded_file($file->tmp_name, $file->destination . "/" . $fileName);
+                    $response['data'] = $file;
+                    $response['message'] = "File uploaded successfully";
+                }
             }
+            unset($file->tmp_name);
         }
         return Helpers::turnToJSON($response);
     }
